@@ -9,8 +9,10 @@ type UserResponse = Omit<User, 'password'>;
 export class UsersService {
   private readonly users: User[] = [new User('login', 'password')];
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  create(createUserDto: CreateUserDto): UserResponse {
+    const user = new User(createUserDto.login, createUserDto.password);
+    this.users.push(user);
+    return this.removePassword(user);
   }
 
   findAll(): UserResponse[] {

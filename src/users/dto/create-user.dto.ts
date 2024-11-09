@@ -1,8 +1,16 @@
+import { IsNotEmpty, IsString } from 'class-validator';
+
 interface ICreateUserDto {
   login: string;
   password: string;
 }
 
 export class CreateUserDto implements ICreateUserDto {
-  constructor(public login: string, public password: string) {}
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  login: string;
 }
