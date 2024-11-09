@@ -9,11 +9,13 @@ import {
   HttpStatus,
   ValidationPipe,
   Put,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { isUUID } from 'class-validator';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('users')
 export class UsersController {
@@ -65,7 +67,14 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    //todo check how to incapsulate this logic in pipe or something else
+    if (!isUUID(id)) {
+      throw new HttpException('Id is not uuid', HttpStatus.BAD_REQUEST);
+    }
+    if (!this.usersService.remove(id)) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
   }
 }

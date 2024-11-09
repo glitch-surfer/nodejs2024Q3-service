@@ -40,8 +40,12 @@ export class UsersService {
     return this.removePassword(updatedUser);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string): boolean {
+    const isUserExist = Boolean(this.users[id]);
+    if (!isUserExist) return false;
+
+    delete this.users[id];
+    return true;
   }
 
   private removePassword(user?: User): UserResponse | null {
