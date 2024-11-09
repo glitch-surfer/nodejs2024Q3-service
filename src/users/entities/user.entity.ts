@@ -16,4 +16,13 @@ export class User implements IUser {
   updatedAt = Date.now();
 
   constructor(public login: string, public password: string) {}
+
+  static updatePassword(oldUser: User, newPassword: string): User {
+    return {
+      ...oldUser,
+      version: oldUser.version++,
+      updatedAt: Date.now(),
+      password: newPassword,
+    };
+  }
 }

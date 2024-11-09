@@ -3,12 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpException,
   HttpStatus,
   ValidationPipe,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -40,12 +40,28 @@ export class UsersController {
     return user;
   }
 
-  @Patch(':id')
-  update(
+  @Put(':id')
+  updatePassword(
     @Param('id') id: string,
-    @Body() UpdatePasswordDto: UpdatePasswordDto,
+    @Body(new ValidationPipe()) UpdatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.usersService.update(+id, UpdatePasswordDto);
+    if (!isUUID(id)) {
+      throw new HttpException('Id is not uuid', HttpStatus.BAD_REQUEST);
+    }
+
+    const updatedPassword = this.usersService.updatePassword(
+      id,
+      UpdatePasswordDto,
+    );
+
+    if (updatedPassword === null) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
+    if (updatedPassword === '') {
+      throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
+    }
+
+    return updatedPassword;
   }
 
   @Delete(':id')

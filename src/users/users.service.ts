@@ -7,24 +7,37 @@ type UserResponse = Omit<User, 'password'>;
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [new User('login', 'password')];
+  private readonly users: Record<string, User> = {};
 
   create(createUserDto: CreateUserDto): UserResponse {
     const user = new User(createUserDto.login, createUserDto.password);
-    this.users.push(user);
+    this.users[user.id] = user;
     return this.removePassword(user);
   }
 
   findAll(): UserResponse[] {
-    return this.users.map(this.removePassword);
+    return Object.values(this.users).map(this.removePassword);
   }
 
   findOne(id: string): UserResponse {
-    return this.removePassword(this.users.find((user) => user.id === id));
+    return this.removePassword(this.users[id]);
   }
 
-  update(id: number, UpdatePasswordDto: UpdatePasswordDto) {
-    return `This action updates a #${id} user`;
+  updatePassword(
+    id: string,
+    UpdatePasswordDto: UpdatePasswordDto,
+  ): string | null | UserResponse {
+    const user = this.users[id];
+    if (!user) return null;
+    if (user.password !== UpdatePasswordDto.oldPassword) return '';
+
+    const updatedUser = User.updatePassword(
+      user,
+      UpdatePasswordDto.newPassword,
+    );
+
+    this.users[id] = updatedUser;
+    return this.removePassword(updatedUser);
   }
 
   remove(id: number) {
