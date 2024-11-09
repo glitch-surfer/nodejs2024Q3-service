@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Album } from './entities/album.entity';
 
 @Injectable()
 export class AlbumsService {
-  create(createAlbumDto: CreateAlbumDto) {
-    return 'This action adds a new album';
+  private readonly albums: Record<string, Album> = {};
+
+  create({ name, year, artistId }: CreateAlbumDto): Album {
+    const album = new Album(name, year, artistId);
+    this.albums[album.id] = album;
+    return album;
   }
 
-  findAll() {
-    return `This action returns all albums`;
+  findAll(): Album[] {
+    return Object.values(this.albums);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  findOne(id: string): Album | undefined {
+    return this.albums[id];
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`;
+  update(id: string, { name, year, artistId }: UpdateAlbumDto): null | Album {
+    const album = this.albums[id];
+    if (!album) return null;
+
+    const updatedAlbum = Album.updateAlbum(album, name, year, artistId);
+
+    this.albums[id] = updatedAlbum;
+    return updatedAlbum;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`;
+  remove(id: string): boolean {
+    const isAlbumExist = Boolean(this.albums[id]);
+    if (!isAlbumExist) return false;
+
+    delete this.albums[id];
+    return true;
   }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Album } from '../entities/album.entity';
 
 type ICreateAlbumDto = Omit<Album, 'id'>;
@@ -13,5 +13,6 @@ export class CreateAlbumDto implements ICreateAlbumDto {
   name: string;
 
   @IsString()
-  artistId: string;
+  @IsOptional()
+  artistId: string | null;
 }

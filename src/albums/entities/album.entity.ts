@@ -13,6 +13,20 @@ export class Album implements IAlbum {
   constructor(
     public name: string,
     public year: number,
-    public artistId: string,
+    public artistId: string | null,
   ) {}
+
+  static updateAlbum(
+    album: Album,
+    name: string,
+    year: number,
+    artistId: string,
+  ) {
+    return {
+      ...album,
+      name,
+      year,
+      artistId,
+    };
+  }
 }
