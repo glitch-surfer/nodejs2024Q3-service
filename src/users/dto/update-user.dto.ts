@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
+interface IUpdatePasswordDto {
+  oldPassword: string; // previous password
+  newPassword: string; // new password
+}
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UpdatePasswordDto implements IUpdatePasswordDto {
+  constructor(public oldPassword: string, public newPassword: string) {}
+}
