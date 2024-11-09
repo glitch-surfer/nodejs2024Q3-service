@@ -16,6 +16,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { isUUID } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
+import { ValidateUuidPipe } from 'src/pipes/validate-uuid';
 
 @Controller('users')
 export class UsersController {
@@ -32,11 +33,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    if (!isUUID(id)) {
-      throw new HttpException('Id is not uuid', HttpStatus.BAD_REQUEST);
-    }
-
+  findOne(@Param('id', ValidateUuidPipe) id: string) {
     const user = this.usersService.findOne(id);
     if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     return user;
@@ -44,13 +41,9 @@ export class UsersController {
 
   @Put(':id')
   updatePassword(
-    @Param('id') id: string,
+    @Param('id', ValidateUuidPipe) id: string,
     @Body(new ValidationPipe()) UpdatePasswordDto: UpdatePasswordDto,
   ) {
-    if (!isUUID(id)) {
-      throw new HttpException('Id is not uuid', HttpStatus.BAD_REQUEST);
-    }
-
     const updatedPassword = this.usersService.updatePassword(
       id,
       UpdatePasswordDto,
@@ -68,11 +61,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    //todo check how to incapsulate this logic in pipe or something else
-    if (!isUUID(id)) {
-      throw new HttpException('Id is not uuid', HttpStatus.BAD_REQUEST);
-    }
+  remove(@Param('id', ValidateUuidPipe) id: string) {
     if (!this.usersService.remove(id)) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
