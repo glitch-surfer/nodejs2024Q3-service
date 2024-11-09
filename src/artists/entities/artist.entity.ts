@@ -10,4 +10,12 @@ export class Artist implements IArtist {
   id = uuid.v4();
 
   constructor(public name: string, public grammy: boolean) {}
+
+  static updateArtist(artist: Artist, name: string, grammy: boolean) {
+    return {
+      ...artist,
+      name,
+      grammy,
+    };
+  }
 }

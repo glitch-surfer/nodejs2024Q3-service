@@ -10,6 +10,8 @@ import {
   ValidationPipe,
   Put,
   HttpCode,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -35,7 +37,7 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id', ValidateUuidPipe) id: string) {
     const user = this.usersService.findOne(id);
-    if (!user) throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    if (!user) throw new NotFoundException('Not Found');
     return user;
   }
 
@@ -50,10 +52,10 @@ export class UsersController {
     );
 
     if (updatedPassword === null) {
-      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('Not Found');
     }
     if (updatedPassword === '') {
-      throw new HttpException('Wrong old password', HttpStatus.FORBIDDEN);
+      throw new ForbiddenException('Wrong old password');
     }
 
     return updatedPassword;
