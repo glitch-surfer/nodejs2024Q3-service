@@ -1,4 +1,5 @@
 import * as uuid from 'uuid';
+import { UpdateTrackDto } from '../dto/update-track.dto';
 
 interface ITrack {
   id: string; // uuid v4
@@ -17,4 +18,20 @@ export class Track implements ITrack {
     public albumId: string | null,
     public duration: number,
   ) {}
+
+  static updateTrack(
+    track: Track,
+    name: string,
+    duration: number,
+    artistId?: string,
+    albumId?: string,
+  ): Track {
+    return {
+      ...track,
+      name,
+      duration,
+      artistId,
+      albumId,
+    };
+  }
 }

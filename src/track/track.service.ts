@@ -1,26 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
-  create(createTrackDto: CreateTrackDto) {
-    return 'This action adds a new track';
+  private readonly tracks: Record<string, Track> = {};
+
+  create({ name, duration, artistId, albumId }: CreateTrackDto): Track {
+    const track = new Track(name, artistId, albumId, duration);
+    this.tracks[track.id] = track;
+    return track;
   }
 
-  findAll() {
-    return `This action returns all track`;
+  findAll(): Track[] {
+    return Object.values(this.tracks);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} track`;
+  findOne(id: string): Track | undefined {
+    return this.tracks[id];
   }
 
-  update(id: number, updateTrackDto: UpdateTrackDto) {
-    return `This action updates a #${id} track`;
+  update(
+    id: string,
+    { name, duration, artistId, albumId }: UpdateTrackDto,
+  ): Track | null {
+    const track = this.tracks[id];
+    if (!track) return null;
+
+    const updatedTrack = Track.updateTrack(
+      track,
+      name,
+      duration,
+      artistId,
+      albumId,
+    );
+    this.tracks[id] = updatedTrack;
+    return updatedTrack;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} track`;
+  remove(id: string): boolean {
+    const isTrackExist = Boolean(this.tracks[id]);
+    if (!isTrackExist) return false;
+
+    delete this.tracks[id];
+    return true;
   }
 }
