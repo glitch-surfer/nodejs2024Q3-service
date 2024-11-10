@@ -49,6 +49,8 @@ export class TrackService {
   }
 
   remove(id: string): boolean {
-    return this.tracksDb.remove(id);
+    const result = this.tracksDb.remove(id);
+    if (result) this.databaseService.removeTrack(id);
+    return result;
   }
 }

@@ -1,26 +1,72 @@
-import { Injectable } from '@nestjs/common';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { HttpException, Injectable } from '@nestjs/common';
+import { DataBaseService } from 'src/data-base/data-base.service';
+import { FavoritesDb } from 'src/data-base/db/favorites.db';
+import { FavoritesResponse } from './entities/favorite.entity';
+import { StatusCodes } from 'http-status-codes';
 
 @Injectable()
 export class FavoritesService {
-  create(createFavoriteDto: CreateFavoriteDto) {
-    return 'This action adds a new favorite';
+  private readonly favoritesDb: FavoritesDb;
+
+  constructor(private readonly dataBaseService: DataBaseService) {
+    this.favoritesDb = this.dataBaseService.favoritesDb;
   }
 
-  findAll() {
-    return `This action returns all favorites`;
+  findAll(): FavoritesResponse {
+    return this.dataBaseService.getFavorites();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} favorite`;
+  addFavoriteTrack(id: string) {
+    if (!this.dataBaseService.isTrackExists(id)) {
+      throw new HttpException(
+        'Track not found',
+        StatusCodes.UNPROCESSABLE_ENTITY,
+      );
+    }
+    this.favoritesDb.addFavoriteTrack(id);
   }
 
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
-    return `This action updates a #${id} favorite`;
+  removeFavoriteTrack(id: string) {
+    const result = this.favoritesDb.removeFavoriteTrack(id);
+    if (!result) {
+      throw new HttpException('Track is not favorite', StatusCodes.NOT_FOUND);
+    }
+    return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} favorite`;
+  addFavoriteAlbum(id: string) {
+    if (!this.dataBaseService.isAlbumExists(id)) {
+      throw new HttpException(
+        'Album not found',
+        StatusCodes.UNPROCESSABLE_ENTITY,
+      );
+    }
+    this.favoritesDb.addFavoriteAlbum(id);
+  }
+
+  removeFavoriteAlbum(id: string) {
+    const result = this.favoritesDb.removeFavoriteAlbum(id);
+    if (!result) {
+      throw new HttpException('Album is not favorite', StatusCodes.NOT_FOUND);
+    }
+    return result;
+  }
+
+  addFavoriteArtist(id: string) {
+    if (!this.dataBaseService.isArtistExists(id)) {
+      throw new HttpException(
+        'Artist not found',
+        StatusCodes.UNPROCESSABLE_ENTITY,
+      );
+    }
+    this.favoritesDb.addFavoriteArtist(id);
+  }
+
+  removeFavoriteArtist(id: string) {
+    const result = this.favoritesDb.removeFavoriteArtist(id);
+    if (!result) {
+      throw new HttpException('Artist is not favorite', StatusCodes.NOT_FOUND);
+    }
+    return result;
   }
 }
