@@ -2,10 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
+import { TrackService } from 'src/track/track.service';
 
 @Injectable()
 export class AlbumsService {
   private readonly albums: Record<string, Album> = {};
+
+  constructor(private readonly tracksService: TrackService) {}
 
   create({ name, year, artistId }: CreateAlbumDto): Album {
     const album = new Album(name, year, artistId);
@@ -36,6 +39,14 @@ export class AlbumsService {
     if (!isAlbumExist) return false;
 
     delete this.albums[id];
+    this.tracksService.removeAlbum(id);
     return true;
+  }
+
+  removeArtist(id: string): void {
+    for (const albumId in this.albums) {
+      const track = this.albums[albumId];
+      if (track.artistId === id) track.artistId = null;
+    }
   }
 }

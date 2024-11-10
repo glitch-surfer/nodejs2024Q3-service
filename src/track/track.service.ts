@@ -46,4 +46,18 @@ export class TrackService {
     delete this.tracks[id];
     return true;
   }
+
+  removeAlbum(id: string): void {
+    for (const trackId in this.tracks) {
+      const track = this.tracks[trackId];
+      if (track.albumId === id) track.albumId = null;
+    }
+  }
+
+  removeArtist(id: string): void {
+    for (const trackId in this.tracks) {
+      const track = this.tracks[trackId];
+      if (track.artistId === id) track.artistId = null;
+    }
+  }
 }
