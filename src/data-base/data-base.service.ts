@@ -6,9 +6,9 @@ import { TracksDb } from './db/tracks.db';
 @Injectable()
 export class DataBaseService {
   constructor(
-    private readonly artistsDb: ArtistsDb,
-    private readonly albumsDb: AlbumsDb,
-    private readonly tracksDb: TracksDb,
+    public readonly artistsDb: ArtistsDb,
+    public readonly albumsDb: AlbumsDb,
+    public readonly tracksDb: TracksDb,
   ) {}
 
   removeArtist(id: string): void {

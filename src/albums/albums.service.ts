@@ -7,10 +7,11 @@ import { DataBaseService } from 'src/data-base/data-base.service';
 
 @Injectable()
 export class AlbumsService {
-  constructor(
-    private readonly albumsDb: AlbumsDb,
-    private readonly dataBaseService: DataBaseService,
-  ) {}
+  private readonly albumsDb: AlbumsDb;
+
+  constructor(private readonly dataBaseService: DataBaseService) {
+    this.albumsDb = this.dataBaseService.albumsDb;
+  }
 
   create({ name, year, artistId }: CreateAlbumDto): Album {
     if (!this.dataBaseService.isArtistExists(artistId)) {

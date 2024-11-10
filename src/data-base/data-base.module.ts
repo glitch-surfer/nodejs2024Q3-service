@@ -6,6 +6,6 @@ import { TracksDb } from './db/tracks.db';
 
 @Module({
   providers: [ArtistsDb, AlbumsDb, TracksDb, DataBaseService],
-  exports: [ArtistsDb, AlbumsDb, TracksDb, DataBaseService],
+  exports: [DataBaseService],
 })
 export class DataBaseModule {}

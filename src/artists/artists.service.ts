@@ -7,10 +7,11 @@ import { DataBaseService } from 'src/data-base/data-base.service';
 
 @Injectable()
 export class ArtistsService {
-  constructor(
-    private readonly artistsDb: ArtistsDb,
-    private readonly dataBaseService: DataBaseService,
-  ) {}
+  private readonly artistsDb: ArtistsDb;
+
+  constructor(private readonly dataBaseService: DataBaseService) {
+    this.artistsDb = this.dataBaseService.artistsDb;
+  }
 
   create({ name, grammy }: CreateArtistDto): Artist {
     return this.artistsDb.create({ name, grammy });
