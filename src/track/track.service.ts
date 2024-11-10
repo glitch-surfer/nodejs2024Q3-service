@@ -1,63 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
+import { TracksDb } from 'src/data-base/db/tracks.db';
+import { DataBaseService } from 'src/data-base/data-base.service';
 
 @Injectable()
 export class TrackService {
-  private readonly tracks: Record<string, Track> = {};
+  constructor(
+    private readonly tracksDb: TracksDb,
+    private readonly databaseService: DataBaseService,
+  ) {}
 
   create({ name, duration, artistId, albumId }: CreateTrackDto): Track {
-    const track = new Track(name, artistId, albumId, duration);
-    this.tracks[track.id] = track;
-    return track;
+    if (artistId && !this.databaseService.isArtistExists(artistId)) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    if (albumId && !this.databaseService.isAlbumExists(albumId)) {
+      throw new NotFoundException('Album not found');
+    }
+
+    return this.tracksDb.create({ name, duration, artistId, albumId });
   }
 
   findAll(): Track[] {
-    return Object.values(this.tracks);
+    return this.tracksDb.findAll();
   }
 
   findOne(id: string): Track | undefined {
-    return this.tracks[id];
+    return this.tracksDb.findOne(id);
   }
 
   update(
     id: string,
     { name, duration, artistId, albumId }: UpdateTrackDto,
   ): Track | null {
-    const track = this.tracks[id];
-    if (!track) return null;
+    if (artistId && !this.databaseService.isArtistExists(artistId)) {
+      throw new NotFoundException('Artist not found');
+    }
 
-    const updatedTrack = Track.updateTrack(
-      track,
-      name,
-      duration,
-      artistId,
-      albumId,
-    );
-    this.tracks[id] = updatedTrack;
-    return updatedTrack;
+    if (albumId && !this.databaseService.isAlbumExists(albumId)) {
+      throw new NotFoundException('Album not found');
+    }
+
+    return this.tracksDb.update(id, { name, duration, artistId, albumId });
   }
 
   remove(id: string): boolean {
-    const isTrackExist = Boolean(this.tracks[id]);
-    if (!isTrackExist) return false;
-
-    delete this.tracks[id];
-    return true;
-  }
-
-  removeAlbum(id: string): void {
-    for (const trackId in this.tracks) {
-      const track = this.tracks[trackId];
-      if (track.albumId === id) track.albumId = null;
-    }
-  }
-
-  removeArtist(id: string): void {
-    for (const trackId in this.tracks) {
-      const track = this.tracks[trackId];
-      if (track.artistId === id) track.artistId = null;
-    }
+    return this.tracksDb.remove(id);
   }
 }

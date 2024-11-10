@@ -1,52 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { TrackService } from 'src/track/track.service';
+import { AlbumsDb } from 'src/data-base/db/albums.db';
+import { DataBaseService } from 'src/data-base/data-base.service';
 
 @Injectable()
 export class AlbumsService {
-  private readonly albums: Record<string, Album> = {};
-
-  constructor(private readonly tracksService: TrackService) {}
+  constructor(
+    private readonly albumsDb: AlbumsDb,
+    private readonly dataBaseService: DataBaseService,
+  ) {}
 
   create({ name, year, artistId }: CreateAlbumDto): Album {
-    const album = new Album(name, year, artistId);
-    this.albums[album.id] = album;
-    return album;
+    if (!this.dataBaseService.isArtistExists(artistId)) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    return this.albumsDb.create({ name, year, artistId });
   }
 
   findAll(): Album[] {
-    return Object.values(this.albums);
+    return this.albumsDb.findAll();
   }
 
   findOne(id: string): Album | undefined {
-    return this.albums[id];
+    return this.albumsDb.findOne(id);
   }
 
   update(id: string, { name, year, artistId }: UpdateAlbumDto): null | Album {
-    const album = this.albums[id];
-    if (!album) return null;
+    if (!this.dataBaseService.isArtistExists(artistId)) {
+      throw new NotFoundException('Artist not found');
+    }
 
-    const updatedAlbum = Album.updateAlbum(album, name, year, artistId);
-
-    this.albums[id] = updatedAlbum;
-    return updatedAlbum;
+    return this.albumsDb.update(id, { name, year, artistId });
   }
 
   remove(id: string): boolean {
-    const isAlbumExist = Boolean(this.albums[id]);
-    if (!isAlbumExist) return false;
-
-    delete this.albums[id];
-    this.tracksService.removeAlbum(id);
-    return true;
-  }
-
-  removeArtist(id: string): void {
-    for (const albumId in this.albums) {
-      const track = this.albums[albumId];
-      if (track.artistId === id) track.artistId = null;
+    const result = this.albumsDb.remove(id);
+    if (result) {
+      this.dataBaseService.removeAlbum(id);
     }
+
+    return result;
   }
 }
