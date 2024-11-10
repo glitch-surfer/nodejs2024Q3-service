@@ -7,6 +7,7 @@ import { ValidateUuidPipe } from './pipes/validate-uuid';
 import { AlbumsModule } from './albums/albums.module';
 import { TrackModule } from './track/track.module';
 import { DataBaseModule } from './data-base/data-base.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DataBaseModule } from './data-base/data-base.module';
     AlbumsModule,
     TrackModule,
     DataBaseModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService, ValidateUuidPipe],
