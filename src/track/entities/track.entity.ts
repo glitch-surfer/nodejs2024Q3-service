@@ -1,5 +1,4 @@
 import * as uuid from 'uuid';
-import { UpdateTrackDto } from '../dto/update-track.dto';
 
 interface ITrack {
   id: string; // uuid v4

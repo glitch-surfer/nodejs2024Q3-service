@@ -16,7 +16,7 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { ValidateUuidPipe } from 'src/pipes/validate-uuid';
 import { StatusCodes } from 'http-status-codes';
 
-@Controller('albums')
+@Controller('album')
 export class AlbumsController {
   constructor(private readonly albumsService: AlbumsService) {}
 

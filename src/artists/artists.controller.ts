@@ -16,7 +16,7 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { ValidateUuidPipe } from 'src/pipes/validate-uuid';
 import { StatusCodes } from 'http-status-codes';
 
-@Controller('artists')
+@Controller('artist')
 export class ArtistsController {
   constructor(private readonly artistsService: ArtistsService) {}
 

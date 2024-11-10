@@ -16,11 +16,10 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { isUUID } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
 import { ValidateUuidPipe } from 'src/pipes/validate-uuid';
 
-@Controller('users')
+@Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
