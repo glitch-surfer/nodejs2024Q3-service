@@ -14,7 +14,7 @@ export class AlbumsService {
   }
 
   create({ name, year, artistId }: CreateAlbumDto): Album {
-    if (!this.dataBaseService.isArtistExists(artistId)) {
+    if (artistId && !this.dataBaseService.isArtistExists(artistId)) {
       throw new NotFoundException('Artist not found');
     }
 
@@ -30,7 +30,7 @@ export class AlbumsService {
   }
 
   update(id: string, { name, year, artistId }: UpdateAlbumDto): null | Album {
-    if (!this.dataBaseService.isArtistExists(artistId)) {
+    if (artistId && !this.dataBaseService.isArtistExists(artistId)) {
       throw new NotFoundException('Artist not found');
     }
 
