@@ -9,6 +9,7 @@ import { TrackModule } from './track/track.module';
 import { DataBaseModule } from './data-base/data-base.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -18,16 +19,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TrackModule,
     FavoritesModule,
     DataBaseModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'nest_user',
-      password: 'nest_password',
-      database: 'nest_database',
-      entities: [],
-      synchronize: true,
-      autoLoadEntities: true,
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DATABASE_HOST,
+        port: parseInt(process.env.DATABASE_PORT),
+        username: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASSWORD,
+        database: process.env.DATABASE_NAME,
+        entities: [],
+        synchronize: true,
+        autoLoadEntities: true,
+      }),
     }),
   ],
   controllers: [AppController],
