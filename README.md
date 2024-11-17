@@ -27,6 +27,24 @@ After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
+# PostgreSQL Docker Setup for NestJS Application
+
+This guide helps you set up a PostgreSQL database container for your NestJS application using Docker Compose.
+
+## Prerequisites
+
+1. Docker installed on your machine.
+2. Docker Compose installed.
+
+## Steps to Run the Application
+
+1. **Clone this repository** or ensure the `docker-compose.yaml` file is in your working directory.
+
+2. **Create and Start the PostgreSQL Container**:
+   ```bash
+   docker-compose up -d
+
+
 ## Testing
 
 After application running open new terminal and enter:
