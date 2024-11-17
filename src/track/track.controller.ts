@@ -31,8 +31,8 @@ export class TrackController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ValidateUuidPipe) id: string) {
-    const track = this.trackService.findOne(id);
+  async findOne(@Param('id', ValidateUuidPipe) id: string) {
+    const track = await this.trackService.findOne(id);
     if (!track) throw new NotFoundException('Not Found');
     return track;
   }
@@ -47,8 +47,8 @@ export class TrackController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  remove(@Param('id', ValidateUuidPipe) id: string) {
-    const isTrackExist = this.trackService.remove(id);
+  async remove(@Param('id', ValidateUuidPipe) id: string) {
+    const isTrackExist = await this.trackService.remove(id);
     if (!isTrackExist) throw new NotFoundException('Not Found');
   }
 }
