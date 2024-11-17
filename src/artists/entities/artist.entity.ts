@@ -1,4 +1,4 @@
-import * as uuid from 'uuid';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 interface IArtist {
   id: string; // uuid v4
@@ -6,16 +6,14 @@ interface IArtist {
   grammy: boolean;
 }
 
+@Entity()
 export class Artist implements IArtist {
-  id = uuid.v4();
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  constructor(public name: string, public grammy: boolean) {}
+  @Column()
+  name: string;
 
-  static updateArtist(artist: Artist, name: string, grammy: boolean) {
-    return {
-      ...artist,
-      name,
-      grammy,
-    };
-  }
+  @Column()
+  grammy: boolean;
 }

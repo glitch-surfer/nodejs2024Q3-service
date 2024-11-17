@@ -12,7 +12,7 @@ export class FavoritesService {
     this.favoritesDb = this.dataBaseService.favoritesDb;
   }
 
-  findAll(): FavoritesResponse {
+  findAll(): Promise<FavoritesResponse> {
     return this.dataBaseService.getFavorites();
   }
 
