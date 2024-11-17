@@ -2,17 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 type UserResponse = Omit<User, 'password'>;
 
 @Injectable()
 export class UsersService {
-  private readonly usersRepository: Repository<User>;
-
-  constructor(private readonly dataSource: DataSource) {
-    this.usersRepository = this.dataSource.getRepository(User);
-  }
+  constructor(
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+  ) {}
 
   async create({ login, password }: CreateUserDto): Promise<UserResponse> {
     const user = new User();
