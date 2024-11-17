@@ -34,18 +34,18 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ValidateUuidPipe) id: string) {
-    const user = this.usersService.findOne(id);
+  async findOne(@Param('id', ValidateUuidPipe) id: string) {
+    const user = await this.usersService.findOne(id);
     if (!user) throw new NotFoundException('Not Found');
     return user;
   }
 
   @Put(':id')
-  updatePassword(
+  async updatePassword(
     @Param('id', ValidateUuidPipe) id: string,
     @Body(new ValidationPipe()) UpdatePasswordDto: UpdatePasswordDto,
   ) {
-    const updatedPassword = this.usersService.updatePassword(
+    const updatedPassword = await this.usersService.updatePassword(
       id,
       UpdatePasswordDto,
     );
@@ -62,8 +62,8 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  remove(@Param('id', ValidateUuidPipe) id: string) {
-    if (!this.usersService.remove(id)) {
+  async remove(@Param('id', ValidateUuidPipe) id: string) {
+    if (!(await this.usersService.remove(id))) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
   }

@@ -1,28 +1,38 @@
-import * as uuid from 'uuid';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  VersionColumn,
+} from 'typeorm';
 
 interface IUser {
   id: string; // uuid v4
   login: string;
   password: string;
   version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
+  createdAt: Date; // timestamp of creation
+  updatedAt: Date; // timestamp of last update
 }
 
+@Entity()
 export class User implements IUser {
-  id = uuid.v4();
-  version = 1;
-  createdAt = Date.now();
-  updatedAt = Date.now();
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  constructor(public login: string, public password: string) {}
+  @Column()
+  login: string;
 
-  static updatePassword(oldUser: User, newPassword: string): User {
-    return {
-      ...oldUser,
-      version: oldUser.version++,
-      updatedAt: Date.now(),
-      password: newPassword,
-    };
-  }
+  @Column()
+  password: string;
+
+  @VersionColumn()
+  version: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }

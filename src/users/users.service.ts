@@ -2,50 +2,54 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entities/user.entity';
+import { DataSource, Repository } from 'typeorm';
 
 type UserResponse = Omit<User, 'password'>;
 
 @Injectable()
 export class UsersService {
-  private readonly users: Record<string, User> = {};
+  private readonly usersRepository: Repository<User>;
 
-  create(createUserDto: CreateUserDto): UserResponse {
-    const user = new User(createUserDto.login, createUserDto.password);
-    this.users[user.id] = user;
-    return this.removePassword(user);
+  constructor(private readonly dataSource: DataSource) {
+    this.usersRepository = this.dataSource.getRepository(User);
   }
 
-  findAll(): UserResponse[] {
-    return Object.values(this.users).map(this.removePassword);
+  async create({ login, password }: CreateUserDto): Promise<UserResponse> {
+    const user = new User();
+    user.login = login;
+    user.password = password;
+
+    return this.removePassword(await this.usersRepository.save(user));
   }
 
-  findOne(id: string): UserResponse {
-    return this.removePassword(this.users[id]);
+  async findAll(): Promise<UserResponse[]> {
+    return (await this.usersRepository.find()).map(this.removePassword);
   }
 
-  updatePassword(
+  async findOne(id: string): Promise<UserResponse> {
+    return this.removePassword(await this.usersRepository.findOneBy({ id }));
+  }
+
+  async updatePassword(
     id: string,
     UpdatePasswordDto: UpdatePasswordDto,
-  ): string | null | UserResponse {
-    const user = this.users[id];
+  ): Promise<string | null | UserResponse> {
+    const user = await this.usersRepository.findOneBy({ id });
     if (!user) return null;
     if (user.password !== UpdatePasswordDto.oldPassword) return '';
 
-    const updatedUser = User.updatePassword(
-      user,
-      UpdatePasswordDto.newPassword,
+    return this.removePassword(
+      await this.usersRepository.save({
+        ...user,
+        password: UpdatePasswordDto.newPassword,
+      }),
     );
-
-    this.users[id] = updatedUser;
-    return this.removePassword(updatedUser);
   }
 
-  remove(id: string): boolean {
-    const isUserExist = Boolean(this.users[id]);
-    if (!isUserExist) return false;
+  async remove(id: string): Promise<boolean> {
+    if (!(await this.usersRepository.exists({ where: { id } }))) return false;
 
-    delete this.users[id];
-    return true;
+    return this.usersRepository.delete({ id }).then(() => true);
   }
 
   private removePassword(user?: User): UserResponse | null {
