@@ -2,46 +2,58 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { AlbumsDb } from 'src/data-base/db/albums.db';
-import { DataBaseService } from 'src/data-base/data-base.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DataBaseService } from '../data-base/data-base.service';
 
 @Injectable()
 export class AlbumsService {
-  private readonly albumsDb: AlbumsDb;
+  constructor(
+    @InjectRepository(Album)
+    private readonly albumsRepository: Repository<Album>,
+    private readonly dataBaseService: DataBaseService,
+  ) {}
 
-  constructor(private readonly dataBaseService: DataBaseService) {
-    this.albumsDb = this.dataBaseService.albumsDb;
-  }
-
-  create({ name, year, artistId }: CreateAlbumDto): Album {
-    if (artistId && !this.dataBaseService.isArtistExists(artistId)) {
+  async create({ name, year, artistId }: CreateAlbumDto): Promise<Album> {
+    if (artistId && !(await this.dataBaseService.isArtistExists(artistId))) {
       throw new NotFoundException('Artist not found');
     }
 
-    return this.albumsDb.create({ name, year, artistId });
+    const album = new Album();
+    album.name = name;
+    album.year = year;
+    album.artistId = artistId;
+
+    return this.albumsRepository.save(album);
   }
 
-  findAll(): Album[] {
-    return this.albumsDb.findAll();
+  findAll(): Promise<Album[]> {
+    return this.albumsRepository.find();
   }
 
-  findOne(id: string): Album | undefined {
-    return this.albumsDb.findOne(id);
+  findOne(id: string): Promise<Album | null> {
+    return this.albumsRepository.findOneBy({ id });
   }
 
-  update(id: string, { name, year, artistId }: UpdateAlbumDto): null | Album {
-    if (artistId && !this.dataBaseService.isArtistExists(artistId)) {
+  async update(
+    id: string,
+    { name, year, artistId }: UpdateAlbumDto,
+  ): Promise<null | Album> {
+    if (artistId && !(await this.dataBaseService.isArtistExists(artistId))) {
       throw new NotFoundException('Artist not found');
     }
 
-    return this.albumsDb.update(id, { name, year, artistId });
+    const album = await this.albumsRepository.findOneBy({ id });
+    if (!album) return null;
+
+    return this.albumsRepository.save({ ...album, name, year, artistId });
   }
 
-  remove(id: string): boolean {
-    const result = this.albumsDb.remove(id);
-    if (result) {
-      this.dataBaseService.removeAlbum(id);
-    }
+  async remove(id: string): Promise<boolean> {
+    if (!(await this.albumsRepository.exists({ where: { id } }))) return false;
+
+    const result = await this.albumsRepository.delete({ id }).then(() => true);
+    if (result) await this.dataBaseService.removeAlbum(id);
 
     return result;
   }

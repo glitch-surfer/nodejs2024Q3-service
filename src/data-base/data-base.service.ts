@@ -1,31 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { AlbumsDb } from './db/albums.db';
 import { TracksDb } from './db/tracks.db';
 import { FavoritesDb } from './db/favorites.db';
 import { FavoritesResponse } from 'src/favorites/entities/favorite.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Artist } from '../artists/entities/artist.entity';
+import { Album } from '../albums/entities/album.entity';
 
 @Injectable()
 export class DataBaseService {
   private readonly artistsRepository: Repository<Artist>;
+  private readonly albumRepository: Repository<Album>;
 
   constructor(
-    public readonly albumsDb: AlbumsDb,
     public readonly tracksDb: TracksDb,
     public readonly favoritesDb: FavoritesDb,
     private readonly dataSource: DataSource,
   ) {
     this.artistsRepository = dataSource.getRepository(Artist);
+    this.albumRepository = dataSource.getRepository(Album);
   }
 
   async removeArtist(id: string): Promise<void> {
-    this.albumsDb.removeArtist(id);
     this.tracksDb.removeArtist(id);
     this.favoritesDb.removeFavoriteArtist(id);
   }
 
-  removeAlbum(id: string): void {
+  async removeAlbum(id: string): Promise<void> {
     this.tracksDb.removeAlbum(id);
     this.favoritesDb.removeFavoriteAlbum(id);
   }
@@ -34,12 +34,12 @@ export class DataBaseService {
     this.favoritesDb.removeFavoriteTrack(id);
   }
 
-  async isArtistExists(id: string): Promise<boolean> {
-    return await this.artistsRepository.exists({ where: { id } });
+  isArtistExists(id: string): Promise<boolean> {
+    return this.artistsRepository.exists({ where: { id } });
   }
 
-  isAlbumExists(albumId: string): boolean {
-    return Boolean(this.albumsDb.findOne(albumId));
+  isAlbumExists(id: string): Promise<boolean> {
+    return this.albumRepository.exists({ where: { id } });
   }
 
   isTrackExists(trackId: string): boolean {
@@ -54,7 +54,9 @@ export class DataBaseService {
           this.artistsRepository.findOneBy({ id }),
         ),
       ),
-      albums: favoriteIds.albums.map((id) => this.albumsDb.findOne(id)),
+      albums: await Promise.all(
+        favoriteIds.albums.map((id) => this.albumRepository.findOneBy({ id })),
+      ),
       tracks: favoriteIds.tracks.map((id) => this.tracksDb.findOne(id)),
     };
   }

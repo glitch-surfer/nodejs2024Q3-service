@@ -21,11 +21,11 @@ export class ArtistsService {
     return this.artistsRepository.save(artist);
   }
 
-  async findAll(): Promise<Artist[]> {
+  findAll(): Promise<Artist[]> {
     return this.artistsRepository.find();
   }
 
-  async findOne(id: string): Promise<Artist | undefined> {
+  findOne(id: string): Promise<Artist | undefined> {
     return this.artistsRepository.findOneBy({ id });
   }
 
