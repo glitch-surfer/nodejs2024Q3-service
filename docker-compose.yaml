@@ -37,7 +37,8 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       DATABASE_NAME: ${DATABASE_NAME}
     volumes:
-      - .:/usr/src/app
+      - ./src:/usr/src/app/src
+      - ./test:/usr/src/app/test
     networks:
       - nest_network
 
