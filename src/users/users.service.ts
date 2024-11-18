@@ -5,12 +5,6 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-interface UserResponse
-  extends Omit<User, 'password' | 'createdAt' | 'updatedAt'> {
-  createdAt: number;
-  updatedAt: number;
-}
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -29,7 +23,7 @@ export class UsersService {
     return (await this.usersRepository.find()).map(this.getUserResponse);
   }
 
-  async findOne(id: string): Promise<UserResponse> {
+  async findOne(id: string) {
     return this.getUserResponse(await this.usersRepository.findOneBy({ id }));
   }
 
@@ -52,7 +46,7 @@ export class UsersService {
     return this.usersRepository.delete({ id }).then(() => true);
   }
 
-  private getUserResponse(user?: User): UserResponse | null {
+  private getUserResponse(user?: User) {
     if (!user) return null;
     const { password, ...userWithoutPass } = user;
     return {
