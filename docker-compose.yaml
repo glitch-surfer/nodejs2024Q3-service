@@ -2,6 +2,11 @@ services:
   postgres:
     image: postgres:15
     container_name: postgres_container
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -14,6 +19,27 @@ services:
     networks:
       - nest_network
     restart: always
+
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_nestjs_app
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - nest_network
 
 networks:
   nest_network:

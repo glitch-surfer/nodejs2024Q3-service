@@ -21,7 +21,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "g:resource": "nest g resource",
-    "migration:run": "npx typeorm-ts-node-esm migration:run -d ./src/data-source.ts"
+    "migration:run": "npm run build && npx typeorm-ts-node-commonjs migration:run -d dist/data-source.js"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

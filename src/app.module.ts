@@ -32,10 +32,8 @@ import { AppDataSource } from './data-source';
           password: process.env.DATABASE_PASSWORD,
           database: process.env.DATABASE_NAME,
           entities: [],
-          synchronize: false,
+          synchronize: true,
           autoLoadEntities: true,
-          migrations: ['./src/migrations/**/*{.ts,.js, .mjs}'],
-          migrationsRun: true,
         };
       },
     }),

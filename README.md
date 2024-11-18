@@ -21,7 +21,6 @@ npm install
 
 ```
 docker-compose up -d
-npm start
 ```
 
 After starting the app on port (4000 as default) you can open
