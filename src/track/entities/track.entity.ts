@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Artist } from '../../artists/entities/artist.entity';
+import { Album } from '../../albums/entities/album.entity';
 
 interface ITrack {
   id: string; // uuid v4
@@ -36,7 +37,7 @@ export class Track implements ITrack {
   @Column({ nullable: true })
   albumId: string | null;
 
-  @ManyToOne(() => Artist, { onDelete: 'SET NULL' })
+  @ManyToOne(() => Album, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'albumId' })
-  album: Artist;
+  album: Album;
 }

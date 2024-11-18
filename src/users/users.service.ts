@@ -5,7 +5,11 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-type UserResponse = Omit<User, 'password'>;
+interface UserResponse
+  extends Omit<User, 'password' | 'createdAt' | 'updatedAt'> {
+  createdAt: number;
+  updatedAt: number;
+}
 
 @Injectable()
 export class UsersService {
@@ -13,31 +17,28 @@ export class UsersService {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create({ login, password }: CreateUserDto): Promise<UserResponse> {
+  async create({ login, password }: CreateUserDto) {
     const user = new User();
     user.login = login;
     user.password = password;
 
-    return this.removePassword(await this.usersRepository.save(user));
+    return this.getUserResponse(await this.usersRepository.save(user));
   }
 
-  async findAll(): Promise<UserResponse[]> {
-    return (await this.usersRepository.find()).map(this.removePassword);
+  async findAll() {
+    return (await this.usersRepository.find()).map(this.getUserResponse);
   }
 
   async findOne(id: string): Promise<UserResponse> {
-    return this.removePassword(await this.usersRepository.findOneBy({ id }));
+    return this.getUserResponse(await this.usersRepository.findOneBy({ id }));
   }
 
-  async updatePassword(
-    id: string,
-    UpdatePasswordDto: UpdatePasswordDto,
-  ): Promise<string | null | UserResponse> {
+  async updatePassword(id: string, UpdatePasswordDto: UpdatePasswordDto) {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) return null;
     if (user.password !== UpdatePasswordDto.oldPassword) return '';
 
-    return this.removePassword(
+    return this.getUserResponse(
       await this.usersRepository.save({
         ...user,
         password: UpdatePasswordDto.newPassword,
@@ -51,9 +52,13 @@ export class UsersService {
     return this.usersRepository.delete({ id }).then(() => true);
   }
 
-  private removePassword(user?: User): UserResponse | null {
+  private getUserResponse(user?: User): UserResponse | null {
     if (!user) return null;
     const { password, ...userWithoutPass } = user;
-    return userWithoutPass;
+    return {
+      ...userWithoutPass,
+      createdAt: +user.createdAt,
+      updatedAt: +user.updatedAt,
+    };
   }
 }

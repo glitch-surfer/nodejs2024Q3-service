@@ -38,11 +38,13 @@ export class ArtistsController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ValidateUuidPipe) id: string,
     @Body(new ValidationPipe()) updateArtistDto: UpdateArtistDto,
   ) {
-    return this.artistsService.update(id, updateArtistDto);
+    const artist = await this.artistsService.update(id, updateArtistDto);
+    if (!artist) throw new NotFoundException('Not Found');
+    return artist;
   }
 
   @Delete(':id')
