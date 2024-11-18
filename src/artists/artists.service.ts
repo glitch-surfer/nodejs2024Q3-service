@@ -2,36 +2,48 @@ import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
-import { ArtistsDb } from 'src/data-base/db/artists.db';
-import { DataBaseService } from 'src/data-base/data-base.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DataBaseService } from '../data-base/data-base.service';
 
 @Injectable()
 export class ArtistsService {
-  private readonly artistsDb: ArtistsDb;
+  constructor(
+    @InjectRepository(Artist)
+    private readonly artistsRepository: Repository<Artist>,
+    private readonly dataBaseService: DataBaseService,
+  ) {}
 
-  constructor(private readonly dataBaseService: DataBaseService) {
-    this.artistsDb = this.dataBaseService.artistsDb;
+  async create({ name, grammy }: CreateArtistDto): Promise<Artist> {
+    const artist = new Artist();
+    artist.name = name;
+    artist.grammy = grammy;
+    return this.artistsRepository.save(artist);
   }
 
-  create({ name, grammy }: CreateArtistDto): Artist {
-    return this.artistsDb.create({ name, grammy });
+  findAll(): Promise<Artist[]> {
+    return this.artistsRepository.find();
   }
 
-  findAll(): Artist[] {
-    return this.artistsDb.findAll();
+  findOne(id: string): Promise<Artist | undefined> {
+    return this.artistsRepository.findOneBy({ id });
   }
 
-  findOne(id: string): Artist | undefined {
-    return this.artistsDb.findOne(id);
+  async update(
+    id: string,
+    { name, grammy }: UpdateArtistDto,
+  ): Promise<null | Artist> {
+    const artist = await this.artistsRepository.findOneBy({ id });
+    if (!artist) return null;
+
+    return await this.artistsRepository.save({ ...artist, name, grammy });
   }
 
-  update(id: string, UpdateArtistDto: UpdateArtistDto): null | Artist {
-    return this.artistsDb.update(id, UpdateArtistDto);
-  }
+  async remove(id: string): Promise<boolean> {
+    if (!(await this.artistsRepository.exists({ where: { id } }))) return false;
 
-  remove(id: string): boolean {
-    const result = this.artistsDb.remove(id);
-    if (result) this.dataBaseService.removeArtist(id);
+    const result = await this.artistsRepository.delete({ id }).then(() => true);
+    if (result) await this.dataBaseService.removeArtist(id);
     return result;
   }
 }

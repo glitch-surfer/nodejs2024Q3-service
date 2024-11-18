@@ -31,24 +31,26 @@ export class AlbumsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ValidateUuidPipe) id: string) {
-    const album = this.albumsService.findOne(id);
+  async findOne(@Param('id', ValidateUuidPipe) id: string) {
+    const album = await this.albumsService.findOne(id);
     if (!album) throw new NotFoundException('Not Found');
     return album;
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ValidateUuidPipe) id: string,
     @Body(new ValidationPipe()) updateAlbumDto: UpdateAlbumDto,
   ) {
-    return this.albumsService.update(id, updateAlbumDto);
+    const album = await this.albumsService.update(id, updateAlbumDto);
+    if (!album) throw new NotFoundException('Not Found');
+    return album;
   }
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  remove(@Param('id', ValidateUuidPipe) id: string) {
-    const isAlbumExist = this.albumsService.remove(id);
+  async remove(@Param('id', ValidateUuidPipe) id: string) {
+    const isAlbumExist = await this.albumsService.remove(id);
     if (!isAlbumExist) throw new NotFoundException('Not Found');
   }
 }

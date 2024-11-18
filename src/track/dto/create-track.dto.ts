@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Track } from '../entities/track.entity';
 
-type ICreateTrackDto = Omit<Track, 'id'>;
+type ICreateTrackDto = Omit<Track, 'id' | 'artist' | 'album'>;
 
 export class CreateTrackDto implements ICreateTrackDto {
   @IsNumber()

@@ -31,24 +31,26 @@ export class ArtistsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ValidateUuidPipe) id: string) {
-    const artist = this.artistsService.findOne(id);
+  async findOne(@Param('id', ValidateUuidPipe) id: string) {
+    const artist = await this.artistsService.findOne(id);
     if (!artist) throw new NotFoundException('Not Found');
     return artist;
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ValidateUuidPipe) id: string,
     @Body(new ValidationPipe()) updateArtistDto: UpdateArtistDto,
   ) {
-    return this.artistsService.update(id, updateArtistDto);
+    const artist = await this.artistsService.update(id, updateArtistDto);
+    if (!artist) throw new NotFoundException('Not Found');
+    return artist;
   }
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  remove(@Param('id', ValidateUuidPipe) id: string) {
-    const isArtistExist = this.artistsService.remove(id);
+  async remove(@Param('id', ValidateUuidPipe) id: string) {
+    const isArtistExist = await this.artistsService.remove(id);
     if (!isArtistExist) throw new NotFoundException('Not Found');
   }
 }

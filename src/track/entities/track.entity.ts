@@ -1,4 +1,12 @@
-import * as uuid from 'uuid';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Artist } from '../../artists/entities/artist.entity';
+import { Album } from '../../albums/entities/album.entity';
 
 interface ITrack {
   id: string; // uuid v4
@@ -8,29 +16,28 @@ interface ITrack {
   duration: number; // integer number
 }
 
+@Entity()
 export class Track implements ITrack {
-  id = uuid.v4();
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  constructor(
-    public name: string,
-    public artistId: string | null,
-    public albumId: string | null,
-    public duration: number,
-  ) {}
+  @Column()
+  name: string;
 
-  static updateTrack(
-    track: Track,
-    name: string,
-    duration: number,
-    artistId?: string,
-    albumId?: string,
-  ): Track {
-    return {
-      ...track,
-      name,
-      duration,
-      artistId,
-      albumId,
-    };
-  }
+  @Column()
+  duration: number;
+
+  @Column({ nullable: true })
+  artistId: string | null;
+
+  @ManyToOne(() => Artist, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'artistId' })
+  artist: Artist;
+
+  @Column({ nullable: true })
+  albumId: string | null;
+
+  @ManyToOne(() => Album, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'albumId' })
+  album: Album;
 }

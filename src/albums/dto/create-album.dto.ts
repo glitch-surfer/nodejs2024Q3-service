@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Album } from '../entities/album.entity';
 
-type ICreateAlbumDto = Omit<Album, 'id'>;
+type ICreateAlbumDto = Omit<Album, 'id' | 'artist'>;
 
 export class CreateAlbumDto implements ICreateAlbumDto {
   @IsNumber()

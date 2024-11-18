@@ -1,4 +1,11 @@
-import * as uuid from 'uuid';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Artist } from '../../artists/entities/artist.entity';
 
 interface IAlbum {
   id: string; // uuid v4
@@ -7,26 +14,21 @@ interface IAlbum {
   artistId: string | null; // refers to Artist
 }
 
+@Entity()
 export class Album implements IAlbum {
-  id = uuid.v4();
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  constructor(
-    public name: string,
-    public year: number,
-    public artistId: string | null,
-  ) {}
+  @Column()
+  name: string;
 
-  static updateAlbum(
-    album: Album,
-    name: string,
-    year: number,
-    artistId: string,
-  ) {
-    return {
-      ...album,
-      name,
-      year,
-      artistId,
-    };
-  }
+  @Column()
+  year: number;
+
+  @Column({ nullable: true })
+  artistId: string | null;
+
+  @ManyToOne(() => Artist, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'artistId' })
+  artist: Artist;
 }
