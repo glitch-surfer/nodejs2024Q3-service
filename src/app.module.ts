@@ -10,6 +10,7 @@ import { DataBaseModule } from './data-base/data-base.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { AppDataSource } from './data-source';
 
 @Module({
   imports: [
@@ -21,17 +22,22 @@ import { ConfigModule } from '@nestjs/config';
     DataBaseModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        host: process.env.DATABASE_HOST,
-        port: parseInt(process.env.DATABASE_PORT),
-        username: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database: process.env.DATABASE_NAME,
-        entities: [],
-        synchronize: true,
-        autoLoadEntities: true,
-      }),
+      useFactory: async () => {
+        await AppDataSource.initialize();
+        return {
+          type: 'postgres',
+          host: process.env.DATABASE_HOST,
+          port: parseInt(process.env.DATABASE_PORT),
+          username: process.env.DATABASE_USER,
+          password: process.env.DATABASE_PASSWORD,
+          database: process.env.DATABASE_NAME,
+          entities: [],
+          synchronize: false,
+          autoLoadEntities: true,
+          migrations: ['./src/migrations/**/*{.ts,.js, .mjs}'],
+          migrationsRun: true,
+        };
+      },
     }),
   ],
   controllers: [AppController],
