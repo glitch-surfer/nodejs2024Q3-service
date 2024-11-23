@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,7 @@ export class AuthService {
 
   async login({ login, password }: CreateUserDto) {
     const user = await this.usersService.findOneByLogin(login);
-    if (!user || user.password !== password) {
+    if (!user || !(await compare(password, user.password))) {
       throw new ForbiddenException('Wrong credentials');
     }
 

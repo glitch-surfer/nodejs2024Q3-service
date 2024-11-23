@@ -4,6 +4,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { hash, genSalt, compare } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -12,9 +13,10 @@ export class UsersService {
   ) {}
 
   async create({ login, password }: CreateUserDto) {
+    const hashedPassword = await this.getHashedPassword(password);
     const user = new User();
     user.login = login;
-    user.password = password;
+    user.password = hashedPassword;
 
     return this.getUserResponse(await this.usersRepository.save(user));
   }
@@ -34,12 +36,14 @@ export class UsersService {
   async updatePassword(id: string, UpdatePasswordDto: UpdatePasswordDto) {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) return null;
-    if (user.password !== UpdatePasswordDto.oldPassword) return '';
+    if (!(await compare(UpdatePasswordDto.oldPassword, user.password))) {
+      return '';
+    }
 
     return this.getUserResponse(
       await this.usersRepository.save({
         ...user,
-        password: UpdatePasswordDto.newPassword,
+        password: await this.getHashedPassword(UpdatePasswordDto.newPassword),
       }),
     );
   }
@@ -58,5 +62,10 @@ export class UsersService {
       createdAt: +user.createdAt,
       updatedAt: +user.updatedAt,
     };
+  }
+
+  private async getHashedPassword(password: string) {
+    const salt = await genSalt(+process.env.CRYPT_SALT);
+    return await hash(password, salt);
   }
 }
