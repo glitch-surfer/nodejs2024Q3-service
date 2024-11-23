@@ -27,6 +27,10 @@ export class UsersService {
     return this.getUserResponse(await this.usersRepository.findOneBy({ id }));
   }
 
+  async findOneByLogin(login: string) {
+    return this.usersRepository.findOneBy({ login });
+  }
+
   async updatePassword(id: string, UpdatePasswordDto: UpdatePasswordDto) {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) return null;
