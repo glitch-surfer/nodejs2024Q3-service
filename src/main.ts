@@ -2,11 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { LoggingService } from './logging/logging.service';
+import { ResponseLoggingInterceptor } from './logging/response-logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggingService(),
   });
+
+  app.useGlobalInterceptors(
+    new ResponseLoggingInterceptor(app.get(LoggingService)),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
