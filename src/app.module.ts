@@ -12,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AppDataSource } from './data-source';
 import { AuthModule } from './auth/auth.module';
+import { LoggingModule } from './logging/logging.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuthModule } from './auth/auth.module';
       },
     }),
     AuthModule,
+    LoggingModule,
   ],
   controllers: [AppController],
   providers: [AppService, ValidateUuidPipe],
