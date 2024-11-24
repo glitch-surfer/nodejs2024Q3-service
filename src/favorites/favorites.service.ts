@@ -13,7 +13,9 @@ export class FavoritesService {
     @InjectRepository(Favorites)
     private readonly favoritesRepository: Repository<Favorites>,
     private readonly dataBaseService: DataBaseService,
-  ) {}
+  ) {
+    this.initializeFavorites();
+  }
 
   findAll(): Promise<FavoritesResponse> {
     return this.dataBaseService.getFavorites();
@@ -48,7 +50,7 @@ export class FavoritesService {
     entity: LibEntity,
   ): Promise<string> {
     const favorites = await this.getFavoritesIds();
-    const isFavorite = favorites[entity].includes(id);
+    const isFavorite = favorites[entity]?.includes(id);
     if (!isFavorite) {
       const entityName = this.getEntityName(entity);
       throw new HttpException(
@@ -86,5 +88,12 @@ export class FavoritesService {
 
   private async getFavoritesIds(): Promise<Favorites> {
     return (await this.favoritesRepository.find())[0] ?? new Favorites();
+  }
+
+  private async initializeFavorites() {
+    const existingFavorites = await this.favoritesRepository.find();
+    if (existingFavorites.length === 0) {
+      await this.favoritesRepository.save(new Favorites());
+    }
   }
 }

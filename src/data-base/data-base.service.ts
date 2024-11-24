@@ -73,7 +73,8 @@ export class DataBaseService {
     id: string,
     entity: 'tracks' | 'albums' | 'artists',
   ) {
-    const favorites = (await this.favoritesRepository.find())[0];
+    const favorites =
+      (await this.favoritesRepository.find())[0] || new Favorites();
     favorites[entity] =
       favorites[entity]?.filter((entityId) => entityId !== id) ?? [];
     return this.favoritesRepository.save(favorites);
