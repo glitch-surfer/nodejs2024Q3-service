@@ -15,6 +15,12 @@ export class LoggingService extends ConsoleLogger {
     fs.promises.stat(this.logsDir).catch(() => fs.promises.mkdir(this.logsDir));
   }
 
+  async handleError(context: string, error: any) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const stack = error instanceof Error ? error.stack : '';
+    await this.error(message, stack, context);
+  }
+
   async logRequest(req: Request) {
     const logMessages = [`[Request] Method: ${req.method}`, `Url: ${req.url}`];
     if (this.hasKeys(req.query)) {
