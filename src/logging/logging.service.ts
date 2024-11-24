@@ -9,10 +9,13 @@ export class LoggingService extends ConsoleLogger {
   private readonly logFilePath = join(this.logsDir, 'application.log');
   private readonly errorLogFilePath = join(this.logsDir, 'error.log');
   private readonly maxFileSize = process.env.MAX_LOG_FILE_SIZE || 1024 * 1024;
+  private hasDirectoryBeenCreated = false;
 
   constructor() {
     super();
-    fs.promises.stat(this.logsDir).catch(() => fs.promises.mkdir(this.logsDir));
+    if (!fs.existsSync(this.logsDir)) {
+      fs.mkdirSync(this.logsDir, { recursive: true });
+    }
   }
 
   async handleError(context: string, error: any) {
@@ -40,34 +43,32 @@ export class LoggingService extends ConsoleLogger {
   }
 
   override async log(message: string, context?: string) {
-    const formattedMessage = `[LOG] ${context ?? ''} - ${message}`;
+    const formattedMessage = `${context ?? ''} - ${message}`;
     super.log(formattedMessage);
     await this.writeLogToFile(formattedMessage);
   }
 
   override async error(message: string, stack?: string, context?: string) {
-    const formattedMessage = `[ERROR] ${context ?? ''} - ${message} - ${
-      stack ?? ''
-    }`;
+    const formattedMessage = `${context ?? ''} - ${message} - ${stack ?? ''}`;
     super.error(formattedMessage);
     await this.writeLogToFile(formattedMessage);
     await this.writeLogToFile(formattedMessage, true);
   }
 
   override async warn(message: string, context?: string) {
-    const formattedMessage = `[WARN] ${context ?? ''} - ${message}`;
+    const formattedMessage = `${context ?? ''} - ${message}`;
     super.warn(formattedMessage);
     await this.writeLogToFile(formattedMessage);
   }
 
   override async debug(message: string, context?: string) {
-    const formattedMessage = `[DEBUG] ${context ?? ''} - ${message}`;
+    const formattedMessage = `${context ?? ''} - ${message}`;
     super.debug(formattedMessage);
     await this.writeLogToFile(formattedMessage);
   }
 
   override async verbose(message: string, context?: string) {
-    const formattedMessage = `[VERBOSE] ${context ?? ''} - ${message}`;
+    const formattedMessage = `${context ?? ''} - ${message}`;
     super.verbose(formattedMessage);
     await this.writeLogToFile(formattedMessage);
   }
@@ -82,6 +83,7 @@ export class LoggingService extends ConsoleLogger {
       stats = await fs.promises.stat(filePath);
     } catch (error) {
       await fs.promises.writeFile(filePath, '');
+      return;
     }
 
     if (stats?.size > this.maxFileSize) {
@@ -92,7 +94,16 @@ export class LoggingService extends ConsoleLogger {
 
   private async writeLogToFile(message: string, isError = false) {
     const logFilePath = isError ? this.errorLogFilePath : this.logFilePath;
+
+    await this.ensureLogsDirectoryExists();
+
     await this.rotateFileIfNeeded(logFilePath);
     await fs.promises.appendFile(logFilePath, `${message}\n`);
+  }
+
+  private async ensureLogsDirectoryExists() {
+    if (this.hasDirectoryBeenCreated) return;
+    await fs.promises.mkdir(this.logsDir, { recursive: true });
+    this.hasDirectoryBeenCreated = true;
   }
 }
