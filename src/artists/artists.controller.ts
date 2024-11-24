@@ -1,0 +1,56 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  NotFoundException,
+  ValidationPipe,
+  HttpCode,
+} from '@nestjs/common';
+import { ArtistsService } from './artists.service';
+import { CreateArtistDto } from './dto/create-artist.dto';
+import { UpdateArtistDto } from './dto/update-artist.dto';
+import { ValidateUuidPipe } from 'src/pipes/validate-uuid';
+import { StatusCodes } from 'http-status-codes';
+
+@Controller('artist')
+export class ArtistsController {
+  constructor(private readonly artistsService: ArtistsService) {}
+
+  @Post()
+  create(@Body(new ValidationPipe()) createArtistDto: CreateArtistDto) {
+    return this.artistsService.create(createArtistDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.artistsService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ValidateUuidPipe) id: string) {
+    const artist = await this.artistsService.findOne(id);
+    if (!artist) throw new NotFoundException('Not Found');
+    return artist;
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id', ValidateUuidPipe) id: string,
+    @Body(new ValidationPipe()) updateArtistDto: UpdateArtistDto,
+  ) {
+    const artist = await this.artistsService.update(id, updateArtistDto);
+    if (!artist) throw new NotFoundException('Not Found');
+    return artist;
+  }
+
+  @Delete(':id')
+  @HttpCode(StatusCodes.NO_CONTENT)
+  async remove(@Param('id', ValidateUuidPipe) id: string) {
+    const isArtistExist = await this.artistsService.remove(id);
+    if (!isArtistExist) throw new NotFoundException('Not Found');
+  }
+}
